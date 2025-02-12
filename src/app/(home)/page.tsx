@@ -1,5 +1,5 @@
 const HomePage = () => {
-  return <div>page sdkfjkw</div>;
+  return <div>I will Laod videos in the future!</div>;
 };
 
 export default HomePage;
