@@ -3,18 +3,17 @@
 import { DEFAULT_LIMIT } from "@/constants";
 import { ErrorBoundary } from "react-error-boundary";
 
+import { InfiniteScroll } from "@/components/infinite-scroll";
 import { trpc } from "@/trpc/client";
 import { Suspense } from "react";
-import { InfiniteScroll } from "@/components/infinite-scroll";
 
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import Link from "next/link";
 
