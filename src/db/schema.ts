@@ -8,6 +8,11 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 
 export const users = pgTable(
   "users",
@@ -74,7 +79,9 @@ export const videos = pgTable("videos", {
   createAt: timestamp("create_at").defaultNow().notNull(),
   updateAt: timestamp("update_at").defaultNow().notNull(),
 });
-
+export const videoSelectSchema = createSelectSchema(videos);
+export const videoInstertSchema = createInsertSchema(videos);
+export const videoUpdateSchema = createUpdateSchema(videos);
 export const vedioReltaions = relations(videos, ({ one }) => ({
   user: one(users, {
     fields: [videos.userId],
