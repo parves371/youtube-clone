@@ -10,12 +10,13 @@ import { z } from "zod";
 
 export const videosRouter = createTRPCRouter({
   genrateThumbail: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().uuid(), prompt: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { id: userID } = ctx.user;
       const { workflowRunId } = await workflow.trigger({
-        url: `${process.env.UPSTASH_WORKFLOW_URL!}/api/videos/workflows/title`,
-        body: { userID, videoId: input.id },
+        url: `${process.env
+          .UPSTASH_WORKFLOW_URL!}/api/videos/workflows/thumbnail`,
+        body: { userID, videoId: input.id, prompt: input.prompt },
         retries: 3,
       });
 
@@ -26,7 +27,8 @@ export const videosRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id: userID } = ctx.user;
       const { workflowRunId } = await workflow.trigger({
-        url: `${process.env.UPSTASH_WORKFLOW_URL!}/api/videos/workflows/description`,
+        url: `${process.env
+          .UPSTASH_WORKFLOW_URL!}/api/videos/workflows/description`,
         body: { userID, videoId: input.id },
         retries: 3,
       });
