@@ -14,6 +14,7 @@ import {
   CopyIcon,
   GlobeIcon,
   ImagePlusIcon,
+  Loader2Icon,
   LockIcon,
   MoreVerticalIcon,
   RotateCcwIcon,
@@ -121,6 +122,26 @@ const FormSectionSuspense = ({ videoId }: Props) => {
       toast.error("something went wrong");
     },
   });
+  const generateTitle = trpc.videos.genrateTitle.useMutation({
+    onSuccess: () => {
+      toast.success("background jobs started", {
+        description: "this may take a while",
+      });
+    },
+    onError: () => {
+      toast.error("something went wrong");
+    },
+  });
+  const generateDescription = trpc.videos.genrateDescription.useMutation({
+    onSuccess: () => {
+      toast.success("background jobs started", {
+        description: "this may take a while",
+      });
+    },
+    onError: () => {
+      toast.error("something went wrong");
+    },
+  });
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({
     resolver: zodResolver(videoUpdateSchema),
@@ -189,8 +210,31 @@ const FormSectionSuspense = ({ videoId }: Props) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    {/* todo: add ai  ganerate button */}
+                    <FormLabel>
+                      <div
+                        className="flex items-center gap-x-2
+                      "
+                      >
+                        Title
+                        <Button
+                          size={"icon"}
+                          variant={"ghost"}
+                          type="button"
+                          className="rounded-full size-6 [&_svg]:size-3"
+                          onClick={() => generateTitle.mutate({ id: videoId })}
+                          disabled={
+                            generateTitle.isPending || !video.muxTrackId
+                          }
+                        >
+                          {generateTitle.isPending ? (
+                            <Loader2Icon className="animate-spin" />
+                          ) : (
+                            <SparklesIcon />
+                          )}
+                        </Button>
+                      </div>
+                    </FormLabel>
+
                     <FormControl>
                       <Input
                         {...field}
@@ -206,8 +250,32 @@ const FormSectionSuspense = ({ videoId }: Props) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    {/* todo: add ai  ganerate button */}
+                    <FormLabel>
+                      <div
+                        className="flex items-center gap-x-2
+                      "
+                      >
+                        Description
+                        <Button
+                          size={"icon"}
+                          variant={"ghost"}
+                          type="button"
+                          className="rounded-full size-6 [&_svg]:size-3"
+                          onClick={() =>
+                            generateDescription.mutate({ id: videoId })
+                          }
+                          disabled={
+                            generateDescription.isPending || !video.muxTrackId
+                          }
+                        >
+                          {generateDescription.isPending ? (
+                            <Loader2Icon className="animate-spin" />
+                          ) : (
+                            <SparklesIcon />
+                          )}
+                        </Button>
+                      </div>
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
