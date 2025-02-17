@@ -10,6 +10,7 @@ import { headers } from "next/headers";
 import { mux } from "@/lib/mux";
 import { db } from "@/db";
 import { videos } from "@/db/schema";
+import { UTApi } from "uploadthing/server";
 
 const SIGNING_SECRET = process.env.MUX_WEBHOOK_SECRET!;
 
@@ -79,9 +80,22 @@ export const POST = async (req: Request) => {
         });
       }
 
-      const thumbnailUrl = `https://image.mux.com/${PlaybackId}/thumbnail.jpg`;
-      const previewUrl = `https://image.mux.com/${PlaybackId}/animated.gif`;
+      const tempThumbnailUrl = `https://image.mux.com/${PlaybackId}/thumbnail.jpg`;
+      const tempPreviewUrl = `https://image.mux.com/${PlaybackId}/animated.gif`;
       const duration = data.duration ? Math.round(data.duration * 1000) : 0;
+
+      const utiapi = new UTApi();
+
+      const [uploadedThumbnail, uploadedPreview] =
+        await utiapi.uploadFilesFromUrl([tempThumbnailUrl, tempPreviewUrl]);
+
+      if (!uploadedThumbnail.data || !uploadedPreview.data) {
+        return new Response("Failed to upload thumbnail or preview", {
+          status: 400,
+        });
+      }
+      const { key: thumbnailKey, url: thumbnailUrl } = uploadedThumbnail.data;
+      const { key: previewKey, url: previewUrl } = uploadedPreview.data;
 
       await db
         .update(videos)
@@ -90,7 +104,9 @@ export const POST = async (req: Request) => {
           muxPlaybackId: PlaybackId,
           muxAssetId: data.id,
           thumbnailUrl,
+          thumbnailKey,
           previewUrl,
+          previewKey,
           duration,
         })
         .where(eq(videos.muxUploadId, uploadId));
@@ -134,7 +150,7 @@ export const POST = async (req: Request) => {
       const data = payload.data as VideoAssetTrackReadyWebhookEvent["data"] & {
         asset_id: string;
       };
-      console.log("traking f")
+      console.log("traking f");
       // typrscript incorrectly says that asset_id does not exit
       const assetId = data.asset_id; // Get upload_id
       const trackId = data.id; // Get upload_id

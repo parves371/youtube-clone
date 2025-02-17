@@ -4,9 +4,62 @@ import { mux } from "@/lib/mux";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
+import { UTApi } from "uploadthing/server";
 import { z } from "zod";
 
 export const videosRouter = createTRPCRouter({
+  restoreThumbail: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userID } = ctx.user;
+
+      const [exitingVideo] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userID)));
+      if (!exitingVideo) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (exitingVideo.thumbnailKey) {
+        const utiapi = new UTApi();
+        await utiapi.deleteFiles(exitingVideo.thumbnailKey);
+
+        await db
+          .update(videos)
+          .set({ thumbnailKey: null, thumbnailUrl: null })
+          .where(and(eq(videos.id, input.id), eq(videos.userId, userID)));
+      }
+
+      if (!exitingVideo.muxPlaybackId) {
+        throw new TRPCError({ code: "CONFLICT" });
+      }
+
+      const tempThumbnailUrl = `https://image.mux.com/${exitingVideo.muxPlaybackId}/thumbnail.jpg`;
+      const utiapi = new UTApi();
+
+      const uploadedThumbnail = await utiapi.uploadFilesFromUrl(
+        tempThumbnailUrl
+      );
+
+      if (!uploadedThumbnail.data) {
+        throw new TRPCError({ code: "CONFLICT" });
+      }
+
+      const { key: thumbnailKey, url: thumbnailUrl } = uploadedThumbnail.data;
+
+      const [updatedVideo] = await db
+        .update(videos)
+        .set({
+          thumbnailUrl,
+          thumbnailKey,
+        })
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userID)))
+        .returning();
+
+      return updatedVideo;
+    }),
+
   remove: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
