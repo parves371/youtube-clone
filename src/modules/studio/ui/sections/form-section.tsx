@@ -214,8 +214,8 @@ const FormSectionSuspense = ({ videoId }: Props) => {
 
   //   TODO: change if deploying outline of Vercel
   const fullUrl = `${
-    process.env.VERCEL_URL || "http://localhost/3000"
-  }/videos${videoId}`;
+    process.env.VERCEL_URL || "http://localhost:3000"
+  }/videos/${videoId}`;
   const [isCpoied, setIsCopied] = useState(false);
 
   const onCopy = async () => {
@@ -249,7 +249,7 @@ const FormSectionSuspense = ({ videoId }: Props) => {
             <div className="flex items-center gap-x-2">
               <Button
                 type="submit"
-                disabled={update.isPending || form.formState.isDirty}
+                disabled={update.isPending || !form.formState.isDirty}
               >
                 Save
               </Button>
