@@ -3,6 +3,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -29,6 +30,7 @@ export const users = pgTable(
 );
 export const userRelations = relations(users, ({ many }) => ({
   vedios: many(videos),
+  videoView: many(videosViews),
 }));
 
 export const categories = pgTable(
@@ -84,7 +86,7 @@ export const videos = pgTable("videos", {
 export const videoSelectSchema = createSelectSchema(videos);
 export const videoInstertSchema = createInsertSchema(videos);
 export const videoUpdateSchema = createUpdateSchema(videos);
-export const vedioReltaions = relations(videos, ({ one }) => ({
+export const vedioReltaions = relations(videos, ({ one, many }) => ({
   user: one(users, {
     fields: [videos.userId],
     references: [users.id],
@@ -93,4 +95,43 @@ export const vedioReltaions = relations(videos, ({ one }) => ({
     fields: [videos.categoryId],
     references: [categories.id],
   }),
+  view: many(videosViews),
 }));
+
+export const videosViews = pgTable(
+  "video_view",
+  {
+    videoId: uuid("video_id")
+      .references(() => videos.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    createAt: timestamp("create_at").defaultNow().notNull(),
+    updateAt: timestamp("update_at").defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: "video_views_pk",
+      columns: [t.userId, t.videoId],
+    }),
+  ]
+);
+
+export const videoViewRelations = relations(videosViews, ({ one }) => ({
+  video: one(videos, {
+    fields: [videosViews.videoId],
+    references: [videos.id],
+  }),
+  user: one(users, {
+    fields: [videosViews.userId],
+    references: [users.id],
+  }),
+}));
+export const videoViewSelectSchema = createSelectSchema(videosViews);
+export const videoViewInstertSchema = createInsertSchema(videosViews);
+export const videoViewUpdateSchema = createUpdateSchema(videosViews);

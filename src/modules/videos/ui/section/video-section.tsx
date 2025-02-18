@@ -7,6 +7,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { VideoPalyer } from "../components/video-player";
 import VideoBanner from "../components/video-banner";
 import { VideoTopRow } from "../components/video-top-row";
+import { useAuth } from "@clerk/nextjs";
 
 interface videoSectionProps {
   videoId: string;
@@ -27,7 +28,22 @@ const VideoSectionSkeletion = () => {
 };
 
 const VideoSuspense = ({ videoId }: videoSectionProps) => {
+  const { isSignedIn } = useAuth();
+  const utils = trpc.useUtils();
+
   const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
+
+  const createView = trpc.videosView.create.useMutation({
+    onSuccess: () => {
+      utils.videos.getOne.invalidate({ id: videoId });
+    },
+  });
+
+  const handleView = () => {
+    if (!isSignedIn) return;
+    createView.mutate({ videoId: videoId });
+    
+  };
 
   return (
     <>
@@ -38,8 +54,8 @@ const VideoSuspense = ({ videoId }: videoSectionProps) => {
         )}
       >
         <VideoPalyer
-        //   autoPlay
-          onPlay={() => {}}
+          //   autoPlay
+          onPlay={handleView}
           playbackId={video.muxPlaybackId}
           thumbnailUrl={video.thumbnailUrl}
         />

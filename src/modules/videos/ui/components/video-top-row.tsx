@@ -12,14 +12,16 @@ interface VideoTopRowProps {
 // prooerly implement video reactionF
 export const VideoTopRow = ({ video }: VideoTopRowProps) => {
   const compactViews = useMemo(() => {
-    return new Intl.NumberFormat("en-US", { notation: "compact" }).format(1000);
-  }, []);
+    return new Intl.NumberFormat("en-US", { notation: "compact" }).format(
+      video.viewCount
+    );
+  }, [ video.viewCount]);
   const expandedViews = useMemo(() => {
     return new Intl.NumberFormat("en-US", { notation: "standard" }).format(
-      1000
+      video.viewCount
     );
-  }, []);
-  
+  }, [ video.viewCount]);
+
   const compactDate = useMemo(() => {
     return formatDistanceToNow(video.createAt, { addSuffix: true });
   }, [video.createAt]);
