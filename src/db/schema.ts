@@ -38,6 +38,7 @@ export const userRelations = relations(users, ({ many }) => ({
   subcribers: many(subcriptions, {
     relationName: "subcriptions_creator_id_fkey",
   }),
+  comments: many(comments),
 }));
 export const subcriptions = pgTable(
   "subcriptions",
@@ -137,6 +138,34 @@ export const vedioReltaions = relations(videos, ({ one, many }) => ({
   }),
   view: many(videosViews),
   reactions: many(videoReaction),
+  comments: many(comments),
+}));
+export const comments = pgTable("comments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  videoId: uuid("video_id")
+    .references(() => videos.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  content: text("content").notNull(),
+
+  createAt: timestamp("create_at").defaultNow().notNull(),
+  updateAt: timestamp("update_at").defaultNow().notNull(),
+});
+export const commentRelations = relations(comments, ({ one }) => ({
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [comments.videoId],
+    references: [videos.id],
+  }),
 }));
 
 export const videosViews = pgTable(

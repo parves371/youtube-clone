@@ -1,4 +1,5 @@
 "use client";
+import { Skeleton } from "@/components/ui/skeleton";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 import MuxPlayer from "@mux/mux-player-react";
 
@@ -8,6 +9,14 @@ interface VideoPalyerProps {
   autoPlay?: boolean;
   onPlay?: () => void;
 }
+
+export const VideoPalyerSkeleton = () => {
+  return (
+    <div className="aspect-video w-full bg-zinc-900 rounded-xl">
+      <Skeleton className="w-full h-full" />
+    </div>
+  );
+};
 export const VideoPalyer = ({
   playbackId,
   thumbnailUrl,

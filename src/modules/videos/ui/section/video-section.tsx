@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { VideoPalyer } from "../components/video-player";
+import { VideoPalyer, VideoPalyerSkeleton } from "../components/video-player";
 import VideoBanner from "../components/video-banner";
-import { VideoTopRow } from "../components/video-top-row";
+import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
 import { useAuth } from "@clerk/nextjs";
 
 interface videoSectionProps {
@@ -24,7 +24,12 @@ export const VideoSection = ({ videoId }: videoSectionProps) => {
 };
 
 const VideoSectionSkeletion = () => {
-  return <div>Loading...</div>;
+  return (
+    <>
+      <VideoPalyerSkeleton />
+      <VideoTopRowSkeleton />
+    </>
+  );
 };
 
 const VideoSuspense = ({ videoId }: videoSectionProps) => {
@@ -42,7 +47,6 @@ const VideoSuspense = ({ videoId }: videoSectionProps) => {
   const handleView = () => {
     if (!isSignedIn) return;
     createView.mutate({ videoId: videoId });
-    
   };
 
   return (
