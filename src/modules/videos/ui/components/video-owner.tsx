@@ -5,6 +5,7 @@ import { VideoGetOneOutPut } from "../../types";
 import { Button } from "@/components/ui/button";
 import { SubcriptonButton } from "@/modules/subcripton/ui/components/subcription-button";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
+import { useSubcriptionHook } from "@/modules/subcripton/hooks/use-subcription-hook";
 
 interface VideoOwnerProps {
   user: VideoGetOneOutPut["user"];
@@ -12,7 +13,13 @@ interface VideoOwnerProps {
 }
 
 export const VideoOwner = ({ user, videoId }: VideoOwnerProps) => {
-  const { userId: ClerkUserId } = useAuth();
+  const { userId: ClerkUserId, isLoaded } = useAuth();
+  const { isPending, onClick } = useSubcriptionHook({
+    userId: user.id,
+    isSubscribed: user.viewerSubcribed,
+    fromVideoId: videoId,
+  });
+
   return (
     <div className="flex items-center sm:items-start justify-between sm:justify-start gap-3 min-w-0">
       <Link href={`/users/${user.id}`}>
@@ -22,7 +29,7 @@ export const VideoOwner = ({ user, videoId }: VideoOwnerProps) => {
             <UserInfo size={"lg"} name={user.name} />
             <span className="text-sm text-muted-foreground line-clamp-1">
               {/* TODO: add subcribers count */}
-              {0} subcribers
+              {user.subcriberCount} subcribers
             </span>
           </div>
         </div>
@@ -38,9 +45,9 @@ export const VideoOwner = ({ user, videoId }: VideoOwnerProps) => {
         </Button>
       ) : (
         <SubcriptonButton
-          onClick={() => {}}
-          disabled={false}
-          isSubscribed={false}
+          onClick={onClick}
+          disabled={isPending || !isLoaded}
+          isSubscribed={user.viewerSubcribed}
           className="flex-none"
         />
       )}

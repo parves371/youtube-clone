@@ -31,7 +31,7 @@ export const SubcriptonButton = ({
       )}
       size={size}
     >
-      {isSubscribed ? "unSubcribe" : "Subscribe"}
+      {isSubscribed ? "unSubscribe" : "Subscribe"}
     </Button>
   );
 };

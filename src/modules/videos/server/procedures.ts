@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import {
+  subcriptions,
   users,
   videoReaction,
   videos,
@@ -14,7 +15,7 @@ import {
   protectedProcedure,
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, isNotNull } from "drizzle-orm";
 import { UTApi } from "uploadthing/server";
 import { z } from "zod";
 
@@ -43,13 +44,26 @@ export const videosRouter = createTRPCRouter({
           .from(videoReaction)
           .where(inArray(videoReaction.userId, userId ? [userId] : []))
       );
+      const viewerSubcriptions = db.$with("viewer_subcriptions").as(
+        db
+          .select()
+          .from(subcriptions)
+          .where(inArray(subcriptions.viewerId, userId ? [userId] : []))
+      );
 
       const [existingVideo] = await db
-        .with(ViewerReaction)
+        .with(ViewerReaction, viewerSubcriptions)
         .select({
           ...getTableColumns(videos),
           user: {
             ...getTableColumns(users),
+            subcriberCount: db.$count(
+              subcriptions,
+              eq(subcriptions.creatorId, users.id)
+            ),
+            viewerSubcribed: isNotNull(viewerSubcriptions.viewerId).mapWith(
+              Boolean
+            ),
           },
           viewCount: db.$count(videosViews, eq(videosViews.videoId, videos.id)),
           likeCount: db.$count(
@@ -71,9 +85,13 @@ export const videosRouter = createTRPCRouter({
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
         .leftJoin(ViewerReaction, eq(ViewerReaction.videoId, videos.id))
+        .leftJoin(
+          viewerSubcriptions,
+          eq(viewerSubcriptions.creatorId, users.id)
+        )
         .where(eq(videos.id, input.id))
         .limit(1);
-        // .groupBy(videos.id, users.id, ViewerReaction.type);
+      // .groupBy(videos.id, users.id, ViewerReaction.type);
 
       if (!existingVideo) {
         throw new TRPCError({ code: "NOT_FOUND" });
