@@ -167,7 +167,9 @@ export const commentRelations = relations(comments, ({ one }) => ({
     references: [videos.id],
   }),
 }));
-
+export const commentSelectSchema = createSelectSchema(comments);
+export const commentInsertSchema = createInsertSchema(comments);
+export const commentUpdateSchema = createUpdateSchema(comments);
 export const videosViews = pgTable(
   "video_view",
   {
