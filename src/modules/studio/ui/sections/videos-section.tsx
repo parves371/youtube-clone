@@ -162,9 +162,15 @@ const VideosSectionSuspense = () => {
                       <TableCell>
                         {format(new Date(video.createAt), "d MMM yyyy")}
                       </TableCell>
-                      <TableCell className="text-right text-sm">Views</TableCell>
-                      <TableCell className="text-right text-sm">Comments</TableCell>
-                      <TableCell className="text-right text-sm pr-6">Likes</TableCell>
+                      <TableCell className="text-right text-sm">
+                        Views
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        Comments
+                      </TableCell>
+                      <TableCell className="text-right text-sm pr-6">
+                        Likes
+                      </TableCell>
                     </TableRow>
                   </Link>
                 );
@@ -177,7 +183,6 @@ const VideosSectionSuspense = () => {
         hasNextPage={query.hasNextPage}
         isFetchingNextPage={query.isFetchingNextPage}
         fetchNextPage={query.fetchNextPage}
-        isManual
       />
     </div>
   );
