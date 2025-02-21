@@ -2,11 +2,41 @@ import { UserAvatar } from "@/components/user-avatat";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { CommentsGetManyOutPut } from "../../types";
+import { trpc } from "@/trpc/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  MessageSquareCodeIcon,
+  MessageSquareIcon,
+  MoreVerticalIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { toast } from "sonner";
 interface CommentItemProps {
-  comment: CommentsGetManyOutPut[number];
+  comment: CommentsGetManyOutPut["items"][number];
 }
 export const CommentItem = ({ comment }: CommentItemProps) => {
-  console.log({ comment });
+  const clerk = useClerk();
+  const { userId } = useAuth();
+  const utils = trpc.useUtils();
+  const remove = trpc.comments.remove.useMutation({
+    onSuccess: () => {
+      toast.success("Comment removed");
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      if (error.data?.code === "UNAUTHORIZED") {
+        clerk.openSignIn();
+      }
+    },
+  });
   return (
     <div>
       <div className="flex gap-4">
@@ -31,7 +61,29 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
             </div>
           </Link>
           <p className="text-sm">{comment.content}</p>
+          {/* TODO:reactio */}
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={"ghost"} size={"icon"} className="size-8">
+              <MoreVerticalIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => {}}>
+              <MessageSquareIcon className="w-4 h-4 mr-2" />
+              Reply
+            </DropdownMenuItem>
+            {comment.user.clerkId === userId && (
+              <DropdownMenuItem
+                onClick={() => remove.mutate({ id: comment.id })}
+              >
+                <Trash2Icon className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
