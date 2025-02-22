@@ -1,23 +1,22 @@
-import { UserAvatar } from "@/components/user-avatat";
-import { formatDistanceToNow } from "date-fns";
-import Link from "next/link";
-import { CommentsGetManyOutPut } from "../../types";
-import { trpc } from "@/trpc/client";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/user-avatat";
+import { trpc } from "@/trpc/client";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { formatDistanceToNow } from "date-fns";
 import {
-  MessageSquareCodeIcon,
   MessageSquareIcon,
   MoreVerticalIcon,
-  Trash2Icon,
+  Trash2Icon
 } from "lucide-react";
-import { useAuth, useClerk } from "@clerk/nextjs";
+import Link from "next/link";
 import { toast } from "sonner";
+import { CommentsGetManyOutPut } from "../../types";
 interface CommentItemProps {
   comment: CommentsGetManyOutPut["items"][number];
 }
@@ -63,7 +62,7 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
           <p className="text-sm">{comment.content}</p>
           {/* TODO:reactio */}
         </div>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant={"ghost"} size={"icon"} className="size-8">
               <MoreVerticalIcon />
