@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu, // 'DropdownMenu' is defined but never used.
-  DropdownMenuContent, // 'DropdownMenuContent' is defined but never used.
-  DropdownMenuItem, // 'DropdownMenuItem' is defined but never used.
-  DropdownMenuTrigger, // 'DropdownMenuTrigger' is defined but never used.
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   ListPlusIcon,
@@ -19,11 +19,7 @@ interface VideoMenuProps {
   onRemove?: () => void;
 }
 // TODO: implement remove video
-export const VideoMenu = ({
-  videoId, // 'videoId' is defined but never used.
-  variant,
-  onRemove, // 'onRemove' is defined but never used.
-}: VideoMenuProps) => {
+export const VideoMenu = ({ videoId, variant, onRemove }: VideoMenuProps) => {
   const onShare = () => {
     const fullUrl = `${
       // TODO:Change if its Outlide of vercel
