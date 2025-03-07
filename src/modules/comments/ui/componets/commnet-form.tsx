@@ -19,8 +19,17 @@ import { z } from "zod";
 interface CommentFormProps {
   videoId: string;
   onSuccess?: () => void;
+  variant?: "comment" | "reply";
+  parentid?: string;
+  onCancel?: () => void;
 }
-export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
+export const CommentForm = ({
+  videoId,
+  onSuccess,
+  onCancel,
+  parentid,
+  variant = "comment",
+}: CommentFormProps) => {
   const { user } = useUser();
   const utils = trpc.useUtils();
   const clerk = useClerk();
@@ -28,6 +37,7 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
   const create = trpc.comments.create.useMutation({
     onSuccess: () => {
       utils.comments.getMany.invalidate({ videoId });
+      utils.comments.getMany.invalidate({ videoId, parentId: parentid });
       toast.success("Comment added");
       form.reset();
       onSuccess?.();
@@ -43,6 +53,7 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
   const form = useForm<z.infer<typeof commentInsertSchema>>({
     resolver: zodResolver(commentInsertSchema.omit({ userId: true })),
     defaultValues: {
+      parentId: parentid,
       videoId,
       content: "",
     },
@@ -50,6 +61,11 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
 
   const handleSubmit = (value: z.infer<typeof commentInsertSchema>) => {
     create.mutate(value);
+  };
+
+  const handleCancel = () => {
+    form.reset();
+    onCancel?.();
   };
 
   return (
@@ -72,7 +88,11 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
                 <FormControl>
                   <Textarea
                     {...field}
-                    placeholder="Add a comment..."
+                    placeholder={
+                      variant === "comment"
+                        ? "Add a comment..."
+                        : "Add a reply..."
+                    }
                     className="resize-none bg-transparent overflow-hidden min-h-0 w-full p-3"
                   />
                 </FormControl>
@@ -82,8 +102,19 @@ export const CommentForm = ({ videoId, onSuccess }: CommentFormProps) => {
           />
 
           <div className="justify-end gap-2 mt-2 flex">
+            {onCancel && (
+              <Button
+                size={"sm"}
+                variant={"outline"}
+                onClick={handleCancel}
+                disabled={create.isPending}
+                type="button"
+              >
+                Cancel
+              </Button>
+            )}
             <Button type="submit" size={"sm"} disabled={create.isPending}>
-              Comment
+              {variant === "comment" ? "Comment" : "Reply"}
             </Button>
           </div>
         </div>
