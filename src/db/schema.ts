@@ -102,7 +102,6 @@ export const videos = pgTable("videos", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   description: text("description"),
-
   muxStatus: text("mux_status"),
   muxAssetId: text("mux_asset_id").unique(),
   muxUploadId: text("mux_upload_id").unique(),
@@ -114,7 +113,6 @@ export const videos = pgTable("videos", {
   previewUrl: text("preview_url"),
   previewKey: text("preview_key"),
   duration: integer("duration").default(0).notNull(),
-
   visibility: videoVisibility("visibility").default("private").notNull(),
 
   userId: uuid("user_id")
