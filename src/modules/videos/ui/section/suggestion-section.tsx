@@ -1,6 +1,19 @@
+"use client"
 
-export const SugggestionSection = () => {
+import { DEFAULT_LIMIT } from "@/constants"
+import { trpc } from "@/trpc/client"
+
+interface SugggestionSectionProps {
+  vedioId:string
+}
+export const SugggestionSection = ({vedioId}:SugggestionSectionProps) => {
+  const [suggestion]=trpc.suggestions.getMany.useSuspenseInfiniteQuery({
+    vedioId,
+    limit:DEFAULT_LIMIT
+  },{
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  })
   return (
-    <div>SugggestionSection</div>
+    <div>{JSON.stringify(suggestion)}</div>
   )
 }

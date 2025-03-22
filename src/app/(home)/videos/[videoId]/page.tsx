@@ -9,9 +9,12 @@ const VideoPage = async ({ params }: Props) => {
   const { videoId } = await params;
 
   void trpc.videos.getOne.prefetch({ id: videoId });
-  // TODO:Dont forget to fecth infintePrefetch
   void trpc.comments.getMany.prefetchInfinite({
     videoId,
+    limit: DEFAULT_LIMIT,
+  });
+  void trpc.suggestions.getMany.prefetchInfinite({
+    vedioId: videoId,
     limit: DEFAULT_LIMIT,
   });
 
