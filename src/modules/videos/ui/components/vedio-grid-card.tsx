@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { VideoGetManyOutPut } from "../../types";
-import { VideoThumbnail } from "./video-thumbnail";
-import { VideoInfo } from "./video-info";
+import { VideoThumbnail, VideoThumbnailSkeleton } from "./video-thumbnail";
+import { VideoInfo, VideoInfoSkeleton } from "./video-info";
 interface VideoRowCardProps {
   data: VideoGetManyOutPut["items"][number];
   onRemove?: () => void;
 }
+
+export const VideoGridCardSkeleton = () => {
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <VideoThumbnailSkeleton />
+      <VideoInfoSkeleton />
+    </div>
+  );
+};
 
 export const VideoGridCard = ({ data, onRemove }: VideoRowCardProps) => {
   return (
@@ -18,7 +27,7 @@ export const VideoGridCard = ({ data, onRemove }: VideoRowCardProps) => {
           duration={data.duration}
         />
       </Link>
-      <VideoInfo data={data} onRemove={onRemove}/>
+      <VideoInfo data={data} onRemove={onRemove} />
     </div>
   );
 };
