@@ -16,9 +16,3 @@ const SearchPage = async ({ searchParams }: PageProps) => {
 };
 
 export default SearchPage;
-
-
-
-
-
-
