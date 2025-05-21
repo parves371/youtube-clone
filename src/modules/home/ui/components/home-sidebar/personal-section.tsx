@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/sidebar";
 import { FlameIcon, HistoryIcon, ThumbsUpIcon } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const items = [
   {
     title: "History",
-    url: "/playlists/histtory",
+    url: "/playlists/history",
     icon: HistoryIcon,
     auth: true,
   },
@@ -35,6 +36,7 @@ const items = [
 export const PersonalSection = () => {
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
 
   return (
     <SidebarGroup>
@@ -45,7 +47,7 @@ export const PersonalSection = () => {
             <SidebarMenuButton
               tooltip={item.title}
               asChild
-              isActive={false} //Todo: add active state
+              isActive={pathname === item.url}
               onClick={(e) => {
                 if (item.auth && !isSignedIn) {
                   e.preventDefault();
