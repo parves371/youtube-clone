@@ -56,6 +56,7 @@ import { VideoPalyer } from "../../../videos/ui/components/video-player";
 import { ThumbnailGenerateModal } from "../components/thumbnail-genrate-modal";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { APP_URL } from "@/constants";
 
 interface Props {
   videoId: string;
@@ -224,7 +225,7 @@ const FormSectionSuspense = ({ videoId }: Props) => {
 
   //   TODO: change if deploying outline of Vercel
   const fullUrl = `${
-    process.env.VERCEL_URL || "http://localhost:3000"
+     APP_URL ? `https://${APP_URL}` : "http://localhost:3000"
   }/videos/${videoId}`;
   const [isCpoied, setIsCopied] = useState(false);
 

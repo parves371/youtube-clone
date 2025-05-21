@@ -44,7 +44,9 @@ interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
   onRemove?: () => void;
 }
 
-export const VideoRowCardSkeleton = ({ size }: VariantProps<typeof videoRowCardVariants> ) => {
+export const VideoRowCardSkeleton = ({
+  size = "default",
+}: VariantProps<typeof videoRowCardVariants>) => {
   return (
     <div className={videoRowCardVariants({ size })}>
       {/* Thumbnail skeleton */}
@@ -81,7 +83,11 @@ export const VideoRowCardSkeleton = ({ size }: VariantProps<typeof videoRowCardV
   );
 };
 
-export const VideoRowCard = ({ data, size, onRemove }: VideoRowCardProps) => {
+export const VideoRowCard = ({
+  data,
+  size = "default",
+  onRemove,
+}: VideoRowCardProps) => {
   const compectViews = useMemo(() => {
     return Intl.NumberFormat("en", {
       notation: "compact",
@@ -124,13 +130,15 @@ export const VideoRowCard = ({ data, size, onRemove }: VideoRowCardProps) => {
             )}
             {size === "default" && (
               <>
-                <div className="flex items-center gap-2 my-3">
-                  <UserAvatar
-                    size={"sm"}
-                    imageUrl={data.user.imageUrl}
-                    name={data.user.name}
-                  />
-                  <UserInfo size={"sm"} name={data.user.name} />
+                <div className="flex  gap-2 my-3 flex-col">
+                  <div className="flex gap-2">
+                    <UserAvatar
+                      size={"sm"}
+                      imageUrl={data.user.imageUrl}
+                      name={data.user.name}
+                    />
+                    <UserInfo size={"sm"} name={data.user.name} />
+                  </div>
 
                   <Tooltip>
                     <TooltipTrigger asChild>

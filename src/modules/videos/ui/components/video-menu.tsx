@@ -5,6 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { APP_URL } from "@/constants";
 import {
   ListPlusIcon,
   MoreVerticalIcon,
@@ -23,7 +24,7 @@ export const VideoMenu = ({ videoId, variant, onRemove }: VideoMenuProps) => {
   const onShare = () => {
     const fullUrl = `${
       // TODO:Change if its Outlide of vercel
-      process.env.VERCEL_URL || "http://localhost:3000"
+       APP_URL ? `https://${APP_URL}` : "http://localhost:3000"
     }/videos/${videoId}`;
 
     navigator.clipboard.writeText(fullUrl);
