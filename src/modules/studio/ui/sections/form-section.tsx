@@ -223,10 +223,7 @@ const FormSectionSuspense = ({ videoId }: Props) => {
     update.mutate(data);
   };
 
-  //   TODO: change if deploying outline of Vercel
-  const fullUrl = `${
-     APP_URL ? `https://${APP_URL}` : "http://localhost:3000"
-  }/videos/${videoId}`;
+  const fullUrl = `${APP_URL}/videos/${videoId}`;
   const [isCpoied, setIsCopied] = useState(false);
 
   const onCopy = async () => {
