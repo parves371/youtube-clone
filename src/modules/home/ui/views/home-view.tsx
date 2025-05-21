@@ -1,5 +1,5 @@
 import { CategoriesSecton } from "../section/categories-section";
-import { HomeVideosSection } from "../section/home-vedios-section";
+import { HomeVideosSection } from "../section/home-videos-section";
 
 interface HomeViewPrps {
   categoryId?: string;

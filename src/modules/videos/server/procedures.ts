@@ -106,6 +106,90 @@ export const videosRouter = createTRPCRouter({
         nextCursor,
       };
     }),
+  getManySubscribed: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            id: z.string().uuid(),
+            updateAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { cursor, limit } = input;
+
+      const viewerSubcriptions = db.$with("viewer_subcriptions").as(
+        db
+          .select({
+            userId: subcriptions.creatorId,
+          })
+          .from(subcriptions)
+          .where(eq(subcriptions.viewerId, userId))
+      );
+
+      const data = await db
+      .with(viewerSubcriptions)
+        .select({
+          ...getTableColumns(videos),
+          user: users,
+          viewCount: db.$count(videosViews, eq(videosViews.videoId, videos.id)),
+          likecount: db.$count(
+            videoReaction,
+            and(
+              eq(videoReaction.videoId, videos.id),
+              eq(videoReaction.type, "like")
+            )
+          ),
+          dislikecount: db.$count(
+            videoReaction,
+            and(
+              eq(videoReaction.videoId, videos.id),
+              eq(videoReaction.type, "dislike")
+            )
+          ),
+        })
+        .from(videos)
+        .innerJoin(users, eq(videos.userId, users.id))
+        .innerJoin(viewerSubcriptions, eq(viewerSubcriptions.userId, users.id))
+
+        .where(
+          and(
+            eq(videos.visibility, "public"),
+            // check if the cursor is defined and add the condition to the where clause
+            cursor
+              ? or(
+                  lt(videos.updateAt, cursor.updateAt),
+                  and(
+                    eq(videos.updateAt, cursor.updateAt),
+                    lt(videos.id, cursor.id)
+                  )
+                )
+              : undefined
+          )
+        )
+        .orderBy(desc(videos.updateAt), desc(videos.id))
+        // add 1 to the limit to check if there is more data
+
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      // remove the last item if there is more data
+      const items = hasMore ? data.slice(0, -1) : data;
+      // set the next cursor to  the last item if  there is more data
+      const lastItem = items[items.length - 1];
+      const nextCursor = hasMore
+        ? { id: lastItem.id, updateAt: lastItem.updateAt }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
   getMany: baseProcedure
     .input(
       z.object({

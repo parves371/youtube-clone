@@ -18,8 +18,10 @@ export const useSubcriptionHook = ({
 
   const subcribe = trpc.subcriptions.create.useMutation({
     onSuccess: () => {
-      toast.success("Subcribed");
       //   TODO:reinvalidate subcription.getmany ,users get.one
+      utils.videos.getManySubscribed.invalidate();
+      toast.success("Subcribed");
+
       if (fromVideoId) {
         utils.videos.getOne.invalidate({
           id: fromVideoId,
@@ -37,21 +39,23 @@ export const useSubcriptionHook = ({
 
   const unsubcribe = trpc.subcriptions.remove.useMutation({
     onSuccess: () => {
-        toast.success("unsubcribed");
-        //   TODO:reinvalidate subcription.getmany ,users get.one
-        if (fromVideoId) {
-          utils.videos.getOne.invalidate({
-            id: fromVideoId,
-          });
-        }
-      },
-      onError: (error) => {
-        toast.error("sumthing went wrong");
-  
-        if (error.data?.code === "UNAUTHORIZED") {
-          clerk.openSignIn();
-        }
-      },
+      //   TODO:reinvalidate subcription.getmany ,users get.one
+      utils.videos.getManySubscribed.invalidate();
+      toast.success("unsubcribed");
+
+      if (fromVideoId) {
+        utils.videos.getOne.invalidate({
+          id: fromVideoId,
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error("sumthing went wrong");
+
+      if (error.data?.code === "UNAUTHORIZED") {
+        clerk.openSignIn();
+      }
+    },
   });
 
   const isPending = subcribe.isPending || unsubcribe.isPending;
