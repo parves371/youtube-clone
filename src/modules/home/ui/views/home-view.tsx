@@ -1,4 +1,5 @@
 import { CategoriesSecton } from "../section/categories-section";
+import { HomeVideosSection } from "../section/home-vedios-section";
 
 interface HomeViewPrps {
   categoryId?: string;
@@ -8,6 +9,7 @@ export const HomeView = ({ categoryId }: HomeViewPrps) => {
   return (
     <div className="max-w-[2400px] mx-auto mb-10 px-4 pt-2.5 flex flex-col gap-y-6">
       <CategoriesSecton categoryId={categoryId} />
+      <HomeVideosSection categoryId={categoryId} />
     </div>
   );
 };

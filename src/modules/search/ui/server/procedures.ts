@@ -46,6 +46,7 @@ export const searchRouter = createTRPCRouter({
 
         .where(
           and(
+            eq(videos.visibility, "public"),
             ilike(videos.title, `%${query}%`),
             categoryId ? eq(videos.categoryId, categoryId) : undefined,
             // check if the cursor is defined and add the condition to the where clause

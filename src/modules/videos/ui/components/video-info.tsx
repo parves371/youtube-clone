@@ -53,9 +53,9 @@ export const VideoInfo = ({ data, onRemove }: VideoInfoProps) => {
             {compectViews} views • {compectDate}
           </p>
         </Link>
-        <div className="flex-shrink-0">
-          <VideoMenu onRemove={onRemove} videoId={data.id} variant="ghost" />
-        </div>
+      </div>
+      <div className="flex-shrink-0">
+        <VideoMenu onRemove={onRemove} videoId={data.id} variant="ghost" />
       </div>
     </div>
   );
