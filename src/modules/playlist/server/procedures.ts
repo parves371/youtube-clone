@@ -1,5 +1,4 @@
 import { db } from "@/db";
-import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
 import {
   playlist,
   playlistVideos,
@@ -9,10 +8,146 @@ import {
   videosViews,
 } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
+import { z } from "zod";
 
 export const PlaylistRouter = createTRPCRouter({
+  revove: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { id } = input;
+
+      const [deletedPlaylist] = await db
+        .delete(playlist)
+        .where(and(eq(playlist.id, id), eq(playlist.userId, userId)))
+        .returning();
+
+      if (!deletedPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return deletedPlaylist;
+    }),
+
+  getOne: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { id } = input;
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlist)
+        .where(and(eq(playlist.id, id), eq(playlist.userId, userId)));
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return existingPlaylist;
+    }),
+
+  getVideos: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        cursor: z
+          .object({
+            id: z.string().uuid(),
+            updateAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlist)
+        .where(
+          and(eq(playlist.id, input.playlistId), eq(playlist.userId, userId))
+        );
+
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const { cursor, limit, playlistId } = input;
+
+      const videosFromPlaylist = db.$with("viewer_video_views").as(
+        db
+          .select({
+            videoId: playlistVideos.videoId,
+          })
+          .from(playlistVideos)
+          .where(eq(playlistVideos.playlistId, playlistId))
+      );
+
+      const data = await db
+        .with(videosFromPlaylist)
+        .select({
+          ...getTableColumns(videos),
+          user: users,
+
+          viewCount: db.$count(videosViews, eq(videosViews.videoId, videos.id)),
+          likecount: db.$count(
+            videoReaction,
+            and(
+              eq(videoReaction.videoId, videos.id),
+              eq(videoReaction.type, "like")
+            )
+          ),
+          dislikecount: db.$count(
+            videoReaction,
+            and(
+              eq(videoReaction.videoId, videos.id),
+              eq(videoReaction.type, "dislike")
+            )
+          ),
+        })
+        .from(videos)
+        .innerJoin(users, eq(videos.userId, users.id))
+        .innerJoin(
+          videosFromPlaylist,
+          eq(videos.id, videosFromPlaylist.videoId)
+        )
+
+        .where(
+          and(
+            eq(videos.visibility, "public"),
+            // check if the cursor is defined and add the condition to the where clause
+            cursor
+              ? or(
+                  lt(videos.updateAt, cursor.updateAt),
+                  and(
+                    eq(videos.updateAt, cursor.updateAt),
+                    lt(videos.id, cursor.id)
+                  )
+                )
+              : undefined
+          )
+        )
+        .orderBy(desc(videos.updateAt), desc(videos.id))
+        // add 1 to the limit to check if there is more data
+
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      // remove the last item if there is more data
+      const items = hasMore ? data.slice(0, -1) : data;
+      // set the next cursor to  the last item if  there is more data
+      const lastItem = items[items.length - 1];
+      const nextCursor = hasMore
+        ? { id: lastItem.id, updateAt: lastItem.updateAt }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
+
   removeVideo: protectedProcedure
     .input(
       z.object({

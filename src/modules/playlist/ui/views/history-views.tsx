@@ -1,4 +1,4 @@
-import { HistoryVideosSection } from "../sections/history-views-section";
+import { HistoryVideosSection } from "../sections/history-section";
 
 export const HistoryView = () => {
   return (

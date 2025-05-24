@@ -1,4 +1,4 @@
-import { LikedVideosSection } from "../sections/liked-views-section";
+import { LikedVideosSection } from "../sections/liked-section";
 
 export const LikedView = () => {
   return (
