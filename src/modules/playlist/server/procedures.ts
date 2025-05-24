@@ -225,6 +225,18 @@ export const PlaylistRouter = createTRPCRouter({
             eq(playlistVideos.playlistId, playlist.id)
           ),
           user: users,
+          thumbnailUrl: sql<string | null>`(
+            SELECT v.thumbnail_url
+            FROM ${playlistVideos} pv
+            JOIN ${videos} v ON pv.video_id = v.id
+            WHERE pv.playlist_id = ${playlist.id}
+            ORDER BY pv.update_at DESC
+            LIMIT 1
+
+
+
+            )
+          `,
         })
         .from(playlist)
         .innerJoin(users, eq(playlist.userId, users.id))
