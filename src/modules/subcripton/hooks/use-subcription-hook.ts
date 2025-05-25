@@ -18,7 +18,7 @@ export const useSubcriptionHook = ({
 
   const subcribe = trpc.subcriptions.create.useMutation({
     onSuccess: () => {
-      //   TODO:reinvalidate subcription.getmany
+      utils.subcriptions.getMany.invalidate();
       utils.videos.getManySubscribed.invalidate();
       utils.users.getOne.invalidate({
         id: userId,
@@ -42,7 +42,7 @@ export const useSubcriptionHook = ({
 
   const unsubcribe = trpc.subcriptions.remove.useMutation({
     onSuccess: () => {
-      //   TODO:reinvalidate subcription.getmany
+      utils.subcriptions.getMany.invalidate();
       utils.videos.getManySubscribed.invalidate();
       utils.users.getOne.invalidate({
         id: userId,

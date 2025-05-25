@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import { subcriptions } from "@/db/schema";
+import { subcriptions, users } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 import { z } from "zod";
 
 export const subcriptionsRouter = createTRPCRouter({
@@ -59,5 +59,68 @@ export const subcriptionsRouter = createTRPCRouter({
         .returning();
 
       return deletedSubcription;
+    }),
+  getMany: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            creatorId: z.string().uuid(),
+            updateAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { cursor, limit } = input;
+      const { id: userId } = ctx.user;
+
+      const data = await db
+        .select({
+          ...getTableColumns(subcriptions),
+          user: {
+            ...getTableColumns(users),
+            subcriberCount: db.$count(
+              subcriptions,
+              eq(subcriptions.creatorId, users.id)
+            ),
+          },
+        })
+        .from(subcriptions)
+        .innerJoin(users, eq(subcriptions.creatorId, users.id))
+
+        .where(
+          and(
+            eq(subcriptions.viewerId, userId),
+            cursor
+              ? or(
+                  lt(subcriptions.updateAt, cursor.updateAt),
+                  and(
+                    eq(subcriptions.updateAt, cursor.updateAt),
+                    lt(subcriptions.creatorId, cursor.creatorId)
+                  )
+                )
+              : undefined
+          )
+        )
+        .orderBy(desc(subcriptions.updateAt), desc(subcriptions.creatorId))
+        // add 1 to the limit to check if there is more data
+
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      // remove the last item if there is more data
+      const items = hasMore ? data.slice(0, -1) : data;
+      // set the next cursor to  the last item if  there is more data
+      const lastItem = items[items.length - 1];
+      const nextCursor = hasMore
+        ? { creatorId: lastItem.creatorId, updateAt: lastItem.updateAt }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
     }),
 });
