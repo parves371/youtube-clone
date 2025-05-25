@@ -4,6 +4,8 @@ import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Edit2Icon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BannerUploadModal } from "./banner-upload-modal";
+import { useState } from "react";
 
 interface UserViewProps {
   user: UserGetOneOutPut;
@@ -14,9 +16,14 @@ export const UserPageBannerSkeleton = () => {
 };
 export const UserPageBanner = ({ user }: UserViewProps) => {
   const { userId } = useAuth();
+  const [isBannerUploadModalOpen, setIsBannerUploadModalOpen] = useState(false);
   return (
     <div className="relative group">
-      {/* TODO: add edit banner */}
+      <BannerUploadModal
+        userId={user.id}
+        open={isBannerUploadModalOpen}
+        onOpenChange={setIsBannerUploadModalOpen}
+      />
       <div
         className={cn(
           "w-full max-h-[200px] h-[15vh] bg-gradient-to-r from-gray-100 to-gray-200",
@@ -29,7 +36,10 @@ export const UserPageBanner = ({ user }: UserViewProps) => {
         }}
       >
         {user.clerkId === userId && (
-          <Button className="absolute top-4 right-4 rounded-full bg-black/50 hover:bg-black/50 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button
+            onClick={() => setIsBannerUploadModalOpen(true)}
+            className="absolute top-4 right-4 rounded-full bg-black/50 hover:bg-black/50 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
             <Edit2Icon />
             Edit
           </Button>
