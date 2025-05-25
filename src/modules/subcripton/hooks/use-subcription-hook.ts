@@ -18,8 +18,11 @@ export const useSubcriptionHook = ({
 
   const subcribe = trpc.subcriptions.create.useMutation({
     onSuccess: () => {
-      //   TODO:reinvalidate subcription.getmany ,users get.one
+      //   TODO:reinvalidate subcription.getmany
       utils.videos.getManySubscribed.invalidate();
+      utils.users.getOne.invalidate({
+        id: userId,
+      });
       toast.success("Subcribed");
 
       if (fromVideoId) {
@@ -39,8 +42,11 @@ export const useSubcriptionHook = ({
 
   const unsubcribe = trpc.subcriptions.remove.useMutation({
     onSuccess: () => {
-      //   TODO:reinvalidate subcription.getmany ,users get.one
+      //   TODO:reinvalidate subcription.getmany
       utils.videos.getManySubscribed.invalidate();
+      utils.users.getOne.invalidate({
+        id: userId,
+      });
       toast.success("unsubcribed");
 
       if (fromVideoId) {

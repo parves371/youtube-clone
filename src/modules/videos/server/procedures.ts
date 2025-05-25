@@ -194,6 +194,7 @@ export const videosRouter = createTRPCRouter({
     .input(
       z.object({
         categoryId: z.string().uuid().nullish(),
+        userId: z.string().uuid().nullish(),
         cursor: z
           .object({
             id: z.string().uuid(),
@@ -204,7 +205,7 @@ export const videosRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const { cursor, limit, categoryId } = input;
+      const { cursor, limit, categoryId,userId } = input;
 
       const data = await db
         .select({
@@ -232,8 +233,9 @@ export const videosRouter = createTRPCRouter({
         .where(
           and(
             eq(videos.visibility, "public"),
-            categoryId ? eq(videos.categoryId, categoryId) : undefined,
+            categoryId ? eq(videos.categoryId,  categoryId) : undefined,
             // check if the cursor is defined and add the condition to the where clause
+            userId ? eq(videos.userId, userId) : undefined,
             cursor
               ? or(
                   lt(videos.updateAt, cursor.updateAt),
