@@ -81,7 +81,7 @@ export function UserInfoPage({ user }: UserInfoProps) {
               asChild
               className="w-full mt-3 rounded-full"
             >
-              <Link href={"/studio"}>Go to Studio</Link>
+              <Link prefetch  href={"/studio"}>Go to Studio</Link>
             </Button>
           ) : (
             <SubcriptonButton
@@ -122,7 +122,7 @@ export function UserInfoPage({ user }: UserInfoProps) {
                 asChild
                 className=" mt-3 rounded-full"
               >
-                <Link href={"/studio"}>Go to Studio</Link>
+                <Link prefetch  href={"/studio"}>Go to Studio</Link>
               </Button>
             ) : (
               <SubcriptonButton

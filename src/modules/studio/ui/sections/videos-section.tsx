@@ -118,7 +118,7 @@ const VideosSectionSuspense = () => {
               .flatMap((page) => page.items)
               .map((video) => {
                 return (
-                  <Link
+                  <Link prefetch 
                     href={`/studio/videos/${video.id}`}
                     key={video.id}
                     legacyBehavior

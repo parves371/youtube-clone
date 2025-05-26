@@ -40,15 +40,15 @@ export const VideoInfo = ({ data, onRemove }: VideoInfoProps) => {
     <div className="flex gap-3">
       <UserAvatar imageUrl={data.user.imageUrl} name={data.user.name} />
       <div className="min-w-0 flex-1">
-        <Link href={`/videos/${data.id}`}>
+        <Link prefetch  href={`/videos/${data.id}`}>
           <h3 className="font-semibold line-clamp-1 lg:line-clamp-2 text-base break-words">
             {data.title}
           </h3>
         </Link>
-        <Link href={`/users/${data.user.id}`}>
+        <Link prefetch  href={`/users/${data.user.id}`}>
           <UserInfo name={data.user.name} />
         </Link>
-        <Link href={`/users/${data.user.id}`}>
+        <Link prefetch  href={`/users/${data.user.id}`}>
           <p className="text-sm text-gray-600 line-clamp-1">
             {compectViews} views • {compectDate}
           </p>

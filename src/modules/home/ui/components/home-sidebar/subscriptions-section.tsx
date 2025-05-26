@@ -60,7 +60,7 @@ export const SubcriptionsSection = () => {
                   asChild
                   isActive={pathname === `/users/${subcription.user.id}`}
                 >
-                  <Link
+                  <Link prefetch 
                     href={`/users/${subcription.user.id}`}
                     className="flex items-center gap-4"
                   >
@@ -77,7 +77,7 @@ export const SubcriptionsSection = () => {
         {!isLoading && (
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === `/subscriptions`}>
-              <Link href={`/subscriptions`} className="flex items-center gap-4">
+              <Link prefetch  href={`/subscriptions`} className="flex items-center gap-4">
                 <ListIcon className="size-4" />
                 <span className="text-sm">all Subcriptions</span>
               </Link>
